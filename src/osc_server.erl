@@ -157,7 +157,7 @@ make_pattern2([H|T], Acc) ->
 when_to_millisecs(immediately) ->
     0;
 when_to_millisecs({time, Seconds, Fractions}) ->
-    {MegaSecs, Secs, MicroSecs} = now(),
+    {MegaSecs, Secs, MicroSecs} = erlang:timestamp(),
     S = (Seconds - 2208988800) - (MegaSecs * 1000000 + Secs),
     F = Fractions - (MicroSecs * 1000000),
     case (S * 1000) + (1000 div F) of
