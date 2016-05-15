@@ -1,0 +1,15 @@
+{application, osc,
+ [{description, "Open Source Control Application"},
+  {vsn, "1.0.0"},
+  {registered, []},
+  {applications,
+   [kernel,
+    stdlib
+   ]},
+  {env,[{port, 7123}, {recbuf, 8192}]},
+  {modules, []},
+
+  {maintainers, []},
+  {licenses, []},
+  {links, []}
+ ]}.
