@@ -1,4 +1,4 @@
-{application, erlang-osc,
+{application, erlang_osc,
  [{description, "Open Source Control Application"},
   {vsn, "1.0.0"},
   {registered, []},
