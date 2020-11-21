@@ -1,0 +1,14 @@
+{application, osc,
+ [{description, "Open Source Control Application"},
+  {vsn, "2.0.0"},
+  {registered, []},
+  {applications,
+   [kernel,
+    stdlib
+   ]},
+  {env,[{port, 7123}, {recbuf, 8192}]},
+  {modules, []},
+  {licenses, ["ISC"]},
+  {maintainers, ["Duncan McGreggor"]},
+  {links, [{"Github", "https://github.com/erlsci/osc"}]}
+ ]}.

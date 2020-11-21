@@ -1,8 +1,7 @@
-erlang-osc
-==========
+# osc
 
 This is an implementation of the Open Sound Control (OSC) protocol written
-in Erlang.
+in Erlang with OTP.
 
 For more information about OSC, see http://www.opensoundcontrol.org/
 
