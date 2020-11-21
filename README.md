@@ -1,6 +1,6 @@
 # osc
 
-*Erlang support for the Open Sound Control protocol *
+*Erlang support for the Open Sound Control protocol*
 
 [![Build Status][gh-actions-badge]][gh-actions]
 [![Erlang Versions][erlang-badge]][versions]
