@@ -1,0 +1,15 @@
+{application, osc, [
+    {description, "Open Sound Control Application"},
+    {vsn, "2.0.0"},
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib
+    ]},
+    {modules, []},
+    {licenses, ["ISC"]},
+    {maintainers, ["Duncan McGreggor"]},
+    {links, [
+        {"Github", "https://github.com/erlsci/osc"}
+    ]}
+]}.
