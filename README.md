@@ -34,8 +34,8 @@ Test:
 
 [//]: ---Named-Links---
 
-[logo]: priv/images/logo-v1.png
-[logo-large]: priv/images/logo-v1-large.png
+[logo]: priv/images/logo-v2.png
+[logo-large]: priv/images/logo-v2-large.png
 [github]: https://github.com/erlsci/osc
 [gh-actions-badge]: https://github.com/erlsci/osc/workflows/ci%2Fcd/badge.svg
 [gh-actions]: https://github.com/erlsci/osc/actions
