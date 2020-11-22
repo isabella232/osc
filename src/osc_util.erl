@@ -1,8 +1,4 @@
-%% @author Ruslan Babayev <ruslan@babayev.com>
-%% @copyright 2009 Ruslan Babayev
-
 -module(osc_util).
--author('ruslan@babayev.com').
 
 -export([log_data/1]).
 
