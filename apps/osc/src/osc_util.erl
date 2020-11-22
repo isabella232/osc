@@ -9,5 +9,5 @@
 %% @doc Logs handled data.
 %% @spec log_data(Data) -> Data
 log_data(Data) ->
-    error_logger:info_msg("Received ~p", [Data]),
+    error_logger:info_msg("Received message: ~p", [Data]),
     Data.

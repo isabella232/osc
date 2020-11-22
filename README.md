@@ -31,6 +31,23 @@ Run an interactive Erlang shell:
 Note: that will automatically start all the release dependencies as well as
 `osc` itself.
 
+A simple API is supported for adding OSC addresses to the server:
+
+``` erlang
+1> osc:get_addresses().
+[]
+2> osc:add_addresses().
+[ok]
+3> osc:get_addresses().
+["/debug/log_message"]
+4> osc:remove_addresses().
+[ok]
+5> osc:get_addresses().
+[]
+```
+
+See the `osc` module for example payloads in adding and removing OSC addresses.
+
 Create and run a release:
 
     rebar3 release

@@ -12,13 +12,13 @@
 	 terminate/2, code_change/3]).
 
 %% API
--export([start_link/0, add_method/3, delete_method/1]).
+-export([start_link/0, add_address/3, remove_address/1]).
 
 -define(SERVER, ?MODULE). 
-
+-define(ETS_TABLE, osc_addresses).
 -record(state, {
     socket,
-    methods,
+    addresses,
     osc_addresses = []}).
 
 %% @doc Starts the server.
@@ -26,15 +26,15 @@
 start_link() ->
     gen_server:start_link({global, ?SERVER}, ?MODULE, [], []).
 
-%% @doc Adds a method.
-%% @spec add_method(string(), atom(), atom()) -> ok
-add_method(Address, Module, Function) ->
-    gen_server:cast(?SERVER, {add_method, Address, Module, Function}).
+%% @doc Adds an OSC address.
+%% @spec add_address(string(), atom(), atom()) -> ok
+add_address(Address, Module, Function) ->
+    gen_server:cast(?SERVER, {add_address, Address, Module, Function}).
 
-%% @doc Deletes a method.
-%% @spec delete_method(Address) -> ok
-delete_method(Address) ->
-    gen_server:cast(?SERVER, {delete_method, Address}).
+%% @doc Removes an OSC address.
+%% @spec remove_address(Address) -> ok
+remove_address(Address) ->
+    gen_server:cast(?SERVER, {delete_address, Address}).
 
 %% @private
 %% @doc Initializes the server.
@@ -48,8 +48,8 @@ init([]) ->
     Options = [binary, {active, once}, {recbuf, RecBuf}],
     case gen_udp:open(Port, Options) of
 	{ok, Socket} ->
-	    Methods = ets:new(osc_methods, [named_table, ordered_set]),
-	    {ok, #state{socket = Socket, methods = Methods}};
+	    Addresses = ets:new(?ETS_TABLE, [named_table, ordered_set]),
+	    {ok, #state{socket = Socket, addresses = Addresses}};
 	{error, Reason} ->
 	    error_logger:error_report({?MODULE, udp_open, Reason}),
 	    {stop, {?MODULE, udp_open, Reason}}
@@ -66,7 +66,7 @@ init([]) ->
 %%                  {stop, Reason, State}
 handle_call(ping, _From, State) ->
     {reply, pong, State};
-handle_call(get_methods, _From, State) ->
+handle_call(get_addresses, _From, State) ->
     {reply, State#state.osc_addresses, State};
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
@@ -76,17 +76,17 @@ handle_call(_Request, _From, State) ->
 %% @spec handle_cast(Msg, State) -> {noreply, State} |
 %%                                  {noreply, State, Timeout} |
 %%                                  {stop, Reason, State}
-handle_cast({add_method, Address, Module, Function}, State) ->
-    Methods = State#state.methods,
-    ets:insert(Methods, {string:tokens(Address, "/"), {Module, Function}}),
-    OldAddresses = State#state.osc_addresses,
-    {noreply, State#state{osc_addresses = OldAddresses ++ [Address]}};
-handle_cast({remove_method, Address}, State) ->
-    Methods = State#state.methods,
-    ets:delete(Methods, string:tokens(Address, "/")),
-    OldAddresses = State#state.osc_addresses,
-    NewAddresses = lists:dropwhile(fun(X) -> X == Address end, OldAddresses),
-    {noreply, State#state{osc_addresses = NewAddresses}}.
+handle_cast({add_address, Address, Module, Function}, State) ->
+    Addresses = State#state.addresses,
+    ets:insert(Addresses, {string:tokens(Address, "/"), {Module, Function}}),
+    OldOSCAddresses = State#state.osc_addresses,
+    {noreply, State#state{osc_addresses = OldOSCAddresses ++ [Address]}};
+handle_cast({remove_address, Address}, State) ->
+    Addresses = State#state.addresses,
+    ets:delete(Addresses, string:tokens(Address, "/")),
+    OldOSCAddresses = State#state.osc_addresses,
+    NewOSCAddresses = lists:dropwhile(fun(X) -> X == Address end, OldOSCAddresses),
+    {noreply, State#state{osc_addresses = NewOSCAddresses}}.
 
 %% @private
 %% @doc Handles all non call/cast messages.
@@ -105,12 +105,12 @@ handle_info({'EXIT', From, Reason}, State) ->
     {noreply, State};
 handle_info({udp, Socket, _IP, _Port, Packet}, State) ->
     inet:setopts(Socket, [{active, once}]),
-    Methods = State#state.methods,
+    Addresses = State#state.addresses,
     try osc_lib:decode(Packet) of
 	{message, Address, Args} ->
-	    handle_message(immediately, Address, Args, Methods);
+	    handle_message(immediately, Address, Args, Addresses);
 	{bundle, When, Elements} ->
-	    handle_bundle(When, Elements, Methods)
+	    handle_bundle(When, Elements, Addresses)
     catch
 	Class:Term ->
 	    error_logger:error_report({osc_lib,decode,Class,Term})
@@ -133,13 +133,13 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% @doc Handles OSC messages.
-%% @spec handle_message(When, Address, Args, Methods) -> any()
+%% @spec handle_message(When, Address, Args, Addresses) -> any()
 %%       When = time()
 %%       Address = string()
 %%       Args = [any()]
-%%       Methods = [method()]
-handle_message(When, Address, Args, Methods) ->
-    case ets:match(Methods, make_pattern(Address)) of
+%%       Addresses = [address()]
+handle_message(When, Address, Args, Addresses) ->
+    case ets:match(Addresses, make_pattern(Address)) of
 	[] ->
 	    error_logger:info_report({unhandled,{message,Address,Args}});
 	Matches ->
@@ -186,18 +186,18 @@ when_to_millisecs({time, Seconds, Fractions}) ->
     end.
 
 %% @doc Handles OSC bundles.
-%% @spec handle_bundle(When, Elements, Methods) -> any()
+%% @spec handle_bundle(When, Elements, Addresses) -> any()
 %%       Elements = [message() | bundle()]
-%%       Methods = [method()]
+%%       Addresses = [address()]
 %%       message() = {message, Address::string(), Args::[any()]}
 %%       bundle() = {bundle, When::time(), [message() | bundle()]}
 %%       time() = immediately | {time, Seconds::integer(), Fractions::integer()}
-%%       method() = {Module::atom(), Function::atom()}
-handle_bundle(_When, [], _Methods) ->
+%%       address() = {Module::atom(), Function::atom()}
+handle_bundle(_When, [], _Addresses) ->
     ok;
-handle_bundle(When, [{message, Address, Args} | Rest], Methods) ->
-    handle_message(When, Address, Args, Methods),
-    handle_bundle(When, Rest, Methods);
-handle_bundle(When, [{bundle, InnerWhen, Elements} | Rest], Methods) ->
-    handle_bundle(InnerWhen, Elements, Methods),
-    handle_bundle(When, Rest, Methods).
+handle_bundle(When, [{message, Address, Args} | Rest], Addresses) ->
+    handle_message(When, Address, Args, Addresses),
+    handle_bundle(When, Rest, Addresses);
+handle_bundle(When, [{bundle, InnerWhen, Elements} | Rest], Addresses) ->
+    handle_bundle(InnerWhen, Elements, Addresses),
+    handle_bundle(When, Rest, Addresses).
