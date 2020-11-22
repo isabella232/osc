@@ -9,29 +9,53 @@
 [![Project Logo][logo]][logo-large]
 
 This is an implementation of the Open Sound Control (OSC) protocol written
-in Erlang with OTP.
+in Erlang with OTP. The project provides the following:
+
+* `osc_lib`: an API for encoding and decoding OSC messages
+* `osc_client`: a manageed UDP client for OSC servers
+* `osc`: an OTP application (release-baseed) for creeating custom OSC servers
 
 For more information about OSC, see the links below in the 
 [Resources](#resources) section.
 
-## Use
+## Setup
 
-Compile:
+Including in your project's `rebar.config` with one of the following: 
 
-    rebar3 compile
+``` erlang
+%% Latest Release
+{deps, [
+    {osc, {git, "https://github.com/erlsci/osc", {tag, "2.0.0"}}}
+]}.
 
-Tests:
+%% Unstable
+{deps, [
+    {osc, {git, "https://github.com/erlsci/osc", {branch, "release/2.1.x"}}}
+]}.
+```
+
+## Encoding / Decoding OSC Messagees
+
+TBD
+
+## Connecting to Other OSC Servers
+
+TBD
+
+## Running Project Tests
 
     rebar3 as test check
 
-Run an interactive Erlang shell:
+## Running the Default Server
+
+Start an interactive Erlang shell:
 
     rebar3 shell
 
 Note: that will automatically start all the release dependencies as well as
 `osc` itself.
 
-A simple API is supported for adding OSC addresses to the server:
+A simple API is supported for adding OSC addresses to the default server:
 
 ``` erlang
 1> osc:get_addresses().
@@ -45,8 +69,14 @@ A simple API is supported for adding OSC addresses to the server:
 5> osc:get_addresses().
 []
 ```
-
 See the `osc` module for example payloads in adding and removing OSC addresses.
+
+
+## Using `erlsci/osc` Fork as Custom Server
+
+Update the code in `apps/osc/src/osc.erl` to add the OSC addresses you want to
+support (which will require creating the callback code those addreessese will
+need). Update `osc_server:init` to call `osc:add_addresses/0` upon startup.
 
 Create and run a release:
 
