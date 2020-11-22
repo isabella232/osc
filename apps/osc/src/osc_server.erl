@@ -3,23 +3,33 @@
 %% @doc OSC Server.
 
 -module(osc_server).
--author("ruslan@babayev.com").
 
 -behaviour(gen_server).
 
 %% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2,
-	 terminate/2, code_change/3]).
+-export([init/1,
+         handle_call/3,
+         handle_cast/2,
+         handle_info/2,
+         code_change/3,
+	 terminate/2
+]).
 
 %% API
--export([start_link/0, add_address/3, remove_address/1]).
+-export([start_link/0,
+         add_address/3,
+         remove_address/1
+]).
 
+%% Constants, etc.
 -define(SERVER, ?MODULE). 
 -define(ETS_TABLE, osc_addresses).
+
 -record(state, {
     socket,
     addresses,
-    osc_addresses = []}).
+    osc_addresses = []
+}).
 
 %% @doc Starts the server.
 %% @spec start_link() -> {ok, Pid} | ignore | {error, Reason}
@@ -143,7 +153,7 @@ handle_message(When, Address, Args, Addresses) ->
 	[] ->
 	    error_logger:info_report({unhandled,{message,Address,Args}});
 	Matches ->
-	    Time = when_to_millisecs(When),
+	    Time = osc_util:when_to_millisecs(When),
 	    [timer:apply_after(Time, Module, Function, Args) ||
 		[{Module, Function}] <- Matches]
     end.
@@ -168,22 +178,6 @@ make_pattern2([$?|T], Acc) ->
     make_pattern2(T, ['_'|Acc]);
 make_pattern2([H|T], Acc) ->
     make_pattern2(T, [H|Acc]).
-
-%% @doc Converts OSC time to milliseconds.
-%% @spec when_to_millisecs(When) -> integer()
-%%       When = immediately | {time, Seconds::integer(), Fractions::integer()}
-when_to_millisecs(immediately) ->
-    0;
-when_to_millisecs({time, Seconds, Fractions}) ->
-    {MegaSecs, Secs, MicroSecs} = erlang:timestamp(),
-    S = (Seconds - 2208988800) - (MegaSecs * 1000000 + Secs),
-    F = Fractions - (MicroSecs * 1000000),
-    case (S * 1000) + (1000 div F) of
-	Time when Time > 0 ->
-	    Time;
-	_ ->
-	    0
-    end.
 
 %% @doc Handles OSC bundles.
 %% @spec handle_bundle(When, Elements, Addresses) -> any()
