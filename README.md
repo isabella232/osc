@@ -20,7 +20,7 @@ For more information about OSC, see the links below in the
 
 ## Setup
 
-Including in your project's `rebar.config` with one of the following: 
+Include one of the following in your project's `rebar.config`: 
 
 ``` erlang
 %% Latest Release
@@ -52,10 +52,10 @@ Start an interactive Erlang shell:
 
     rebar3 shell
 
-Note: that will automatically start all the release dependencies as well as
-`osc` itself.
+Note: that will automatically start all the release dependency applications as
+well as `osc` itself.
 
-A simple API is supported for adding OSC addresses to the default server:
+Then you can use the simple API for adding OSC addresses to the default server:
 
 ``` erlang
 1> osc:get_addresses().
@@ -101,7 +101,7 @@ To connect to the running release and get an interactive Erlang shell:
 
 * [OSC](https://en.wikipedia.org/wiki/Open_Sound_Control) on WikiPedia
 * [Intro to OSC](http://opensoundcontrol.org/introduction-osc)
-* [Open Sound Control](https://www.cnmat.berkeley.edu/opensoundcontrol)
+* Open Sound Control's [original home](https://www.cnmat.berkeley.edu/opensoundcontrol)
 * [Controlling Ardour with OSC](https://manual.ardour.org/using-control-surfaces/controlling-ardour-with-osc/)
 * [SuperCollider OSC Communication](https://doc.sccode.org/Guides/OSC_communication.html)
 * [Overtone OSC source code](https://github.com/overtone/overtone/tree/master/src/overtone/osc)
