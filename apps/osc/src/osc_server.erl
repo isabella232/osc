@@ -94,10 +94,10 @@ handle_cast({remove_address, Address}, State) ->
 %%                                   {noreply, State, Timeout} |
 %%                                   {stop, Reason, State}
 handle_info({'EXIT', _From, normal}, State) ->
-    logger:error("The OSC server is exiting (normal)."),
+    error_logger:error_msg("The OSC server is exiting (normal)."),
     {noreply, State};
 handle_info({'EXIT', _From, shutdown}, State) ->
-    logger:error("The OSC server server is exiting (shutdown)."),
+    error_logger:error_msg("The OSC server server is exiting (shutdown)."),
     {noreply, State};
 handle_info({'EXIT', From, Reason}, State) ->
     io:format("OSC server process: ~p exited with reason: ~p~n",
