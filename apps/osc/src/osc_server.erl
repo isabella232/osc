@@ -4,20 +4,22 @@
 
 -module(osc_server).
 -author("ruslan@babayev.com").
--vsn("1.0.0").
 
 -behaviour(gen_server).
-
-%% API
--export([start_link/0, add_method/3, delete_method/1]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
 
+%% API
+-export([start_link/0, add_method/3, delete_method/1]).
+
 -define(SERVER, ?MODULE). 
 
--record(state, {socket, methods}).
+-record(state, {
+    socket,
+    methods,
+    osc_addresses = []}).
 
 %% @doc Starts the server.
 %% @spec start_link() -> {ok, Pid} | ignore | {error, Reason}
@@ -41,8 +43,8 @@ delete_method(Address) ->
 %%                     ignore |
 %%                     {stop, Reason}
 init([]) ->
-    {ok, Port} = application:get_env(port),
-    {ok, RecBuf} = application:get_env(recbuf),
+    {ok, Port} = application:get_env(osc, port),
+    {ok, RecBuf} = application:get_env(osc, recbuf),
     Options = [binary, {active, once}, {recbuf, RecBuf}],
     case gen_udp:open(Port, Options) of
 	{ok, Socket} ->
@@ -62,9 +64,12 @@ init([]) ->
 %%                  {noreply, State, Timeout} |
 %%                  {stop, Reason, Reply, State} |
 %%                  {stop, Reason, State}
+handle_call(ping, _From, State) ->
+    {reply, pong, State};
+handle_call(get_methods, _From, State) ->
+    {reply, State#state.osc_addresses, State};
 handle_call(_Request, _From, State) ->
-    Reply = ok,
-    {reply, Reply, State}.
+    {reply, ok, State}.
 
 %% @private
 %% @doc Handles cast messages.
@@ -74,17 +79,30 @@ handle_call(_Request, _From, State) ->
 handle_cast({add_method, Address, Module, Function}, State) ->
     Methods = State#state.methods,
     ets:insert(Methods, {string:tokens(Address, "/"), {Module, Function}}),
-    {noreply, State};
-handle_cast({delete_method, Address}, State) ->
+    OldAddresses = State#state.osc_addresses,
+    {noreply, State#state{osc_addresses = OldAddresses ++ [Address]}};
+handle_cast({remove_method, Address}, State) ->
     Methods = State#state.methods,
     ets:delete(Methods, string:tokens(Address, "/")),
-    {noreply, State}.
+    OldAddresses = State#state.osc_addresses,
+    NewAddresses = lists:dropwhile(fun(X) -> X == Address end, OldAddresses),
+    {noreply, State#state{osc_addresses = NewAddresses}}.
 
 %% @private
 %% @doc Handles all non call/cast messages.
 %% @spec handle_info(Info, State) -> {noreply, State} |
 %%                                   {noreply, State, Timeout} |
 %%                                   {stop, Reason, State}
+handle_info({'EXIT', _From, normal}, State) ->
+    logger:error("The OSC server is exiting (normal)."),
+    {noreply, State};
+handle_info({'EXIT', _From, shutdown}, State) ->
+    logger:error("The OSC server server is exiting (shutdown)."),
+    {noreply, State};
+handle_info({'EXIT', From, Reason}, State) ->
+    io:format("OSC server process: ~p exited with reason: ~p~n",
+	      [From, Reason]),
+    {noreply, State};
 handle_info({udp, Socket, _IP, _Port, Packet}, State) ->
     inet:setopts(Socket, [{active, once}]),
     Methods = State#state.methods,

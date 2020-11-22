@@ -1,12 +1,18 @@
 {application, osc, [
-    {description, "Open Sound Control Application"},
+    {description, "Open Sound Control"},
     {vsn, "2.0.0"},
     {registered, []},
+    {mod, {osc_app, []}},
     {applications, [
         kernel,
         stdlib
     ]},
-    {modules, []},
+    {env, []},
+    {modules, [
+        osc,
+        osc_lib,
+        osc_methods
+    ]},
     {licenses, ["ISC"]},
     {maintainers, ["Duncan McGreggor"]},
     {links, [

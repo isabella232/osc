@@ -7,6 +7,8 @@
 
 -behaviour(supervisor).
 
+-define(SERVER, osc_server). 
+
 %% API
 -export([start_link/0]).
 
@@ -21,6 +23,14 @@ start_link() ->
 %% @doc Initializes the supervisor.
 %% @spec init(Args) -> {ok, {SupFlags, ChildSpecs}} | ignore | {error, Reason}
 init([]) ->
-    Server = {osc_server, {osc_server, start_link, []},
-	      permanent, 2000, worker, [osc_server]},
-    {ok, {{one_for_one, 3, 10}, [Server]}}.
+    Server = #{
+        id => ?SERVER,
+        start => {?SERVER, start_link, []},
+	restart => permanent,
+        shutdown => 2000,
+        type => worker,
+        modules => [?SERVER]},
+    {ok, {#{
+          strategy => one_for_one,
+          intensity => 3,
+          period => 60}, [Server]}}.

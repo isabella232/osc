@@ -43,11 +43,22 @@ You can confirm `osc` is running with:
     
 That should return `pong`.
 
+To connect to the running release and get an interactive Erlang shell:
+
+    INSTALL_DIR/osc/bin/osc attach
+    Attaching to /tmp/erl_pipes/osc@MM-MAC-7744/erlang.pipe.1 (^D to exit)
+
+    (osc@nodename)1>
+
 ## Resources
 
 * [OSC](https://en.wikipedia.org/wiki/Open_Sound_Control) on WikiPedia
 * [Intro to OSC](http://opensoundcontrol.org/introduction-osc)
 * [Open Sound Control](https://www.cnmat.berkeley.edu/opensoundcontrol)
+* [Controlling Ardour with OSC](https://manual.ardour.org/using-control-surfaces/controlling-ardour-with-osc/)
+* [SuperCollider OSC Communication](https://doc.sccode.org/Guides/OSC_communication.html)
+* [Overtone OSC source code](https://github.com/overtone/overtone/tree/master/src/overtone/osc)
+* [OSC 1.0 Specification](http://opensoundcontrol.org/spec-1_0)
 
 
 [//]: ---Named-Links---
