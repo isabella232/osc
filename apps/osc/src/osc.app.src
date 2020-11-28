@@ -1,6 +1,6 @@
 {application, osc, [
     {description, "Open Sound Control"},
-    {vsn, "2.1.0"},
+    {vsn, "2.2.0-dev"},
     {registered, []},
     {mod, {osc_app, []}},
     {applications, [
