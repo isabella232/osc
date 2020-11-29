@@ -35,6 +35,19 @@ decode(<<"/", _/binary>> = Bin) ->
 	    _:_ ->
 		{[Rest1], <<>>}
 	end,
+    {message, Address, Args};
+decode(<<"#", _/binary>> = Bin) ->
+    {Address, Rest1} = decode_string(Bin),
+    {Args, _} =
+	try decode_string(Rest1) of
+	    {[$,|Types], Rest2} ->
+		decode_args(Rest2, Types);
+	    _ ->
+		{[Rest1], <<>>}
+	catch
+	    _:_ ->
+		{[Rest1], <<>>}
+	end,
     {message, Address, Args}.
 
 %% @doc Decodes bundle elements.
