@@ -1,5 +1,5 @@
 {application, osc, [
-    {description, "Open Sound Control"},
+    {description, "Open Sound Control Server"},
     {vsn, "2.1.1"},
     {registered, []},
     {mod, {osc_app, []}},
@@ -11,9 +11,9 @@
     {modules, [
         osc
     ]},
-    {licenses, ["ISC"]},
 
-    {files, ["rebar.config", "README*", "LICENSE*", "src", "apps", "config"]},
+    {licenses, ["ISC"]},
+    {pkg_name, "osc_server"},
     {links, [
         {"Github", "https://github.com/erlsci/osc"}
     ]}

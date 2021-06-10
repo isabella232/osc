@@ -17,8 +17,11 @@
         osc_lib,
         osc_util
     ]},
+
     {licenses, ["ISC"]},
-                        {files, ["rebar.config", "README*", "LICENSE*", "src", "apps", "config"]},
+    {files, ["rebar.config", "README*", "LICENSE*", "src"]},
+    %%{pkg_name, "osc_server"},
+    %%{files, ["rebar.config", "README*", "LICENSE*", "src", "apps", "config"]},
     {links, [
         {"Github", "https://github.com/erlsci/osc"}
     ]}
