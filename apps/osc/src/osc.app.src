@@ -1,6 +1,6 @@
 {application, osc, [
     {description, "Open Sound Control"},
-    {vsn, "2.1.0"},
+    {vsn, "2.1.1"},
     {registered, []},
     {mod, {osc_app, []}},
     {applications, [
@@ -12,7 +12,8 @@
         osc
     ]},
     {licenses, ["ISC"]},
-    {maintainers, ["Duncan McGreggor"]},
+
+    {files, ["rebar.config", "README*", "LICENSE*", "src", "apps", "config"]},
     {links, [
         {"Github", "https://github.com/erlsci/osc"}
     ]}
